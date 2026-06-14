@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Evalúa las capacidades de tu hardware y descubre qué modelos de Inteligencia Artificial (LLM, Difusión, Audio, Visión) puedes ejecutar localmente de manera segura y eficiente.">
+    <title>ModelFit - Calculador de Compatibilidad de IA Local</title>
+    
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons for premium modern look -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- CSS stylesheet link -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="cpu" class="icon-logo"></i>
+                </div>
+                <div>
+                    <h1>ModelFit</h1>
+                    <p class="subtitle">Evaluador de Hardware para Inteligencia Artificial Local</p>
+                </div>
+            </div>
+            <div class="status-badge" id="scan-status-badge">
+                <span class="pulse-dot"></span>
+                <span id="scan-status-text">Escaneando sistema...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- LEFT SIDEBAR: Hardware Stats & Simulator -->
+        <aside class="sidebar">
+            <!-- Hardware Stats Card -->
+            <section class="card stats-card" id="hardware-panel">
+                <div class="card-header">
+                    <i data-lucide="monitor"></i>
+                    <h2>Tu Hardware Actual</h2>
+                </div>
+                
+                <div class="stat-group">
+                    <span class="stat-label">Sistema Operativo</span>
+                    <div class="stat-value" id="hardware-os">--</div>
+                </div>
+
+                <div class="stat-divider"></div>
+
+                <div class="stat-group">
+                    <span class="stat-label">Procesador (CPU)</span>
+                    <div class="stat-value text-wrap" id="hardware-cpu">--</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="cpu-usage-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-sub">
+                        <span id="hardware-cpu-cores">-- núcleos</span>
+                        <span id="hardware-cpu-usage">Uso: --%</span>
+                    </div>
+                </div>
+
+                <div class="stat-divider"></div>
+
+                <div class="stat-group">
+                    <span class="stat-label">Memoria RAM</span>
+                    <div class="stat-value" id="hardware-ram">-- GB / -- GB</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="ram-usage-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-sub">
+                        <span id="hardware-ram-avail">-- GB disponibles</span>
+                        <span id="hardware-ram-percent">--% en uso</span>
+                    </div>
+                </div>
+
+                <div class="stat-divider"></div>
+
+                <div class="stat-group">
+                    <span class="stat-label">Tarjeta Gráfica (GPU)</span>
+                    <div class="stat-value text-wrap" id="hardware-gpu-name">--</div>
+                    <div class="gpu-spec-badge" id="gpu-vendor-badge">--</div>
+                    <div class="stat-sub-group">
+                        <span class="stat-label">Memoria de Video (VRAM)</span>
+                        <div class="stat-value highlight" id="hardware-vram">-- GB</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar highlight-bar" id="vram-usage-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-sub">
+                        <span id="hardware-vram-free">-- GB libres</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hardware Simulator Card -->
+            <section class="card simulator-card">
+                <div class="card-header">
+                    <i data-lucide="sliders"></i>
+                    <h2>Simulador de Hardware</h2>
+                </div>
+                <p class="card-desc">¿Pensando en actualizar componentes? Modifica los recursos simulados para ver qué modelos podrías ejecutar.</p>
+                
+                <div class="simulator-control">
+                    <label class="switch-container">
+                        <input type="checkbox" id="toggle-simulator">
+                        <span class="switch-slider"></span>
+                    </label>
+                    <span class="control-label">Activar Simulación</span>
+                </div>
+
+                <div class="slider-group disabled" id="sim-ram-group">
+                    <div class="slider-label-row">
+                        <span>RAM del Sistema</span>
+                        <span class="slider-val" id="sim-ram-val">16 GB</span>
+                    </div>
+                    <input type="range" id="slider-ram" min="4" max="256" step="4" value="16" disabled>
+                    <div class="slider-ticks">
+                        <span>4G</span>
+                        <span>16G</span>
+                        <span>32G</span>
+                        <span>64G</span>
+                        <span>128G</span>
+                        <span>256G</span>
+                    </div>
+                </div>
+
+                <div class="slider-group disabled" id="sim-vram-group">
+                    <div class="slider-label-row">
+                        <span>VRAM Dedicada (GPU)</span>
+                        <span class="slider-val" id="sim-vram-val">4 GB</span>
+                    </div>
+                    <input type="range" id="slider-vram" min="0" max="48" step="2" value="4" disabled>
+                    <div class="slider-ticks">
+                        <span>0G</span>
+                        <span>4G</span>
+                        <span>8G</span>
+                        <span>12G</span>
+                        <span>16G</span>
+                        <span>24G</span>
+                        <span>48G</span>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <!-- RIGHT MAIN AREA: Search, Filters & Model list -->
+        <div class="main-content">
+            <!-- Warning Banner for Ollama -->
+            <div id="ollama-warning-banner" class="warning-banner hidden">
+                <div class="warning-banner-text">
+                    <i data-lucide="alert-triangle" class="warn-icon"></i>
+                    <div>
+                        <h4>Ollama no está activo</h4>
+                        <p>Inicia el servicio o realiza una instalación auto-asistida en un clic para descargar y probar modelos locales.</p>
+                    </div>
+                </div>
+                <button id="btn-install-ollama" class="btn btn-primary btn-glow">
+                    <i data-lucide="download-cloud"></i>
+                    <span>Instalar Ollama</span>
+                </button>
+            </div>
+
+            <!-- Search & Filters Panel -->
+            <section class="filters-panel">
+                <div class="search-bar">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Buscar modelo por nombre, proveedor o palabra clave..." aria-label="Buscar modelo de IA">
+                </div>
+                
+                <div class="filter-row">
+                    <!-- Category Filters -->
+                    <div class="filter-group">
+                        <span class="filter-label">Categoría:</span>
+                        <div class="filter-pills" id="category-pills" role="tablist">
+                            <button class="pill active" data-category="all" role="tab" aria-selected="true" id="pill-all">Todos</button>
+                            <button class="pill" data-category="llm" role="tab" aria-selected="false" id="pill-llm">Chat & Texto (LLM)</button>
+                            <button class="pill" data-category="programming" role="tab" aria-selected="false" id="pill-programming">Programación (Código)</button>
+                            <button class="pill" data-category="image" role="tab" aria-selected="false" id="pill-image">Imágenes (Difusión)</button>
+                            <button class="pill" data-category="audio" role="tab" aria-selected="false" id="pill-audio">Audio & Voz</button>
+                            <button class="pill" data-category="vision" role="tab" aria-selected="false" id="pill-vision">Visión</button>
+                        </div>
+                    </div>
+
+                    <!-- Compatibility Filters -->
+                    <div class="filter-group">
+                        <span class="filter-label">Compatibilidad:</span>
+                        <div class="filter-pills" id="status-pills" role="tablist">
+                            <button class="pill active" data-status="all" role="tab" aria-selected="true" id="pill-status-all">Todos</button>
+                            <button class="pill pill-green" data-status="optimal" role="tab" aria-selected="false" id="pill-status-opt">🟢 Óptimo</button>
+                            <button class="pill pill-yellow" data-status="partial" role="tab" aria-selected="false" id="pill-status-par">🟡 Parcial</button>
+                            <button class="pill pill-red" data-status="not-recommended" role="tab" aria-selected="false" id="pill-status-not">🔴 No recomendado</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Summary -->
+            <div class="results-meta">
+                <div id="results-count">Mostrando -- de -- modelos</div>
+                <div class="legend">
+                    <span class="legend-item"><span class="legend-dot green"></span> GPU Fluido</span>
+                    <span class="legend-item"><span class="legend-dot yellow"></span> CPU Híbrido</span>
+                    <span class="legend-item"><span class="legend-dot red"></span> Congela el PC</span>
+                </div>
+            </div>
+
+            <!-- Model Grid -->
+            <section class="models-grid" id="models-list-container">
+                <!-- Skeleton Loading Cards -->
+                <div class="card skeleton-card"></div>
+                <div class="card skeleton-card"></div>
+                <div class="card skeleton-card"></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Chat Playground Panel -->
+    <div id="chat-playground" class="playground-panel collapsed">
+        <div class="playground-header">
+            <div class="chat-model-info">
+                <div class="chat-avatar">
+                    <i data-lucide="bot"></i>
+                </div>
+                <div>
+                    <h3 id="chat-model-name">Llama 3.2 3B</h3>
+                    <p class="chat-model-sub">Ollama local en ejecución</p>
+                </div>
+            </div>
+            <button id="close-playground" class="close-btn" aria-label="Cerrar playground de chat">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        
+        <div class="chat-history" id="chat-history">
+            <!-- Messages render dynamically here -->
+            <div class="chat-message assistant">
+                <div class="message-avatar"><i data-lucide="bot"></i></div>
+                <div class="message-bubble">
+                    ¡Hola! Soy el modelo local. Ya estoy cargado y ejecutándose de forma auto-asistida en tu hardware. ¿En qué te puedo ayudar hoy?
+                </div>
+            </div>
+        </div>
+        
+        <form class="chat-input-area" id="chat-form">
+            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off" aria-label="Escribe un mensaje para el modelo local">
+            <button type="submit" id="chat-send-btn" class="send-btn" aria-label="Enviar mensaje">
+                <i data-lucide="send"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Terminal Modal for Ollama Software Installation Logs -->
+    <div id="terminal-modal" class="playground-panel collapsed terminal-panel">
+        <div class="playground-header">
+            <div class="chat-model-info">
+                <div class="chat-avatar console-avatar">
+                    <i data-lucide="terminal"></i>
+                </div>
+                <div>
+                    <h3>Consola de Instalación</h3>
+                    <p class="chat-model-sub">Logs de instalación de Ollama</p>
+                </div>
+            </div>
+            <button id="close-terminal" class="close-btn" aria-label="Cerrar terminal">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        
+        <div class="terminal-body-container">
+            <pre id="terminal-logs" class="terminal-logs-view">Inicializando consola de instalación...</pre>
+        </div>
+        
+        <div class="terminal-footer">
+            <div class="terminal-status-row">
+                <span class="status-indicator">
+                    <span class="status-dot pulse-dot" id="terminal-status-dot"></span>
+                    <span id="terminal-status-text">Descargando e Instalando...</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <p>ModelFit - Creado para evaluar e instalar modelos de IA local de forma asistida y segura.</p>
+            <p class="footer-links">
+                <a href="https://github.com" target="_blank" id="github-link"><i data-lucide="github"></i> Ver en GitHub</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Templates for Dynamic Model Rendering -->
+    <template id="model-card-template">
+        <article class="card model-card">
+            <div class="model-header">
+                <div class="model-title-area">
+                    <span class="model-provider"></span>
+                    <h3 class="model-name"></h3>
+                </div>
+                <span class="category-badge"></span>
+            </div>
+            
+            <p class="model-description"></p>
+            
+            <div class="model-tags"></div>
+            
+            <div class="compatibility-banner">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text"></span>
+                </div>
+                <div class="performance-indicator">
+                    <i data-lucide="zap" class="perf-icon"></i>
+                    <span class="perf-text"></span>
+                </div>
+            </div>
+
+            <!-- Install Progress Area -->
+            <div class="install-progress-container hidden">
+                <div class="progress-bar-container">
+                    <div class="progress-bar install-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="install-progress-text">Descargando... 0%</div>
+            </div>
+
+            <div class="model-details">
+                <div class="detail-row">
+                    <span class="detail-label">Requisito GPU VRAM:</span>
+                    <span class="detail-val vram-val"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Requisito RAM Sistema:</span>
+                    <span class="detail-val ram-val"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tamaño del archivo:</span>
+                    <span class="detail-val size-val"></span>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <!-- Toggle Instructions -->
+                <button class="btn btn-secondary toggle-instructions-btn" id="btn-toggle-instr">
+                    <i data-lucide="terminal"></i>
+                    <span>Comandos</span>
+                    <i data-lucide="chevron-down" class="chevron-icon"></i>
+                </button>
+                
+                <!-- Install Button -->
+                <button class="btn btn-primary install-btn hidden">
+                    <i data-lucide="download"></i>
+                    <span>Instalar</span>
+                </button>
+                
+                <!-- Chat Playground Button -->
+                <button class="btn btn-success chat-btn hidden">
+                    <i data-lucide="message-square"></i>
+                    <span>Probar Chat</span>
+                </button>
+
+                <!-- HuggingFace Info Button -->
+                <a class="btn btn-icon info-btn" href="#" target="_blank" title="Ver en Hugging Face" aria-label="Ver en Hugging Face">
+                    <i data-lucide="external-link"></i>
+                </a>
+            </div>
+
+            <div class="instructions-panel collapsed">
+                <div class="instructions-content"></div>
+            </div>
+        </article>
+    </template>
+
+    <!-- JS script link -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
