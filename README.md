@@ -1,105 +1,107 @@
-# ModelFit: Local AI Hardware Evaluator & Model Checker
+<div align="center">
+  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/cpu.svg" width="80" alt="ModelFit Logo">
+  
+  # ModelFit
+  **Local AI Hardware Evaluator & Model Checker**
 
-**ModelFit** es una herramienta web local diseñada para escanear y evaluar las capacidades de tu hardware (CPU, memoria RAM, tarjeta gráfica GPU y VRAM) con el fin de determinar qué modelos de Inteligencia Artificial (modelos de lenguaje LLM, generadores de imágenes por difusión, transcripción de audio y modelos de visión multimodal) puedes ejecutar localmente de manera segura y eficiente, **previniendo bloqueos del sistema o falta de memoria ("que se estalle el PC")**.
+  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+  [![Flask](https://img.shields.io/badge/Flask-Web_Framework-black?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
+  [![Ollama](https://img.shields.io/badge/Ollama-Ready-white?style=for-the-badge&logo=ollama)](https://ollama.ai/)
+  [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-La aplicación cuenta con una interfaz web premium y moderna construida en Python (Flask) y Vanilla CSS/JS con efectos de glassmorphism, sliders dinámicos y un potente simulador.
-
----
-
-## Características Principales
-
-- 🔍 **Escaneo Automático en Tiempo Real**: Detecta tu Sistema Operativo, procesador (CPU y núcleos), memoria RAM total/disponible, modelo de GPU y cantidad exacta de VRAM dedicados (soportando Nvidia, AMD y Apple Silicon).
-- 🟢🟡🔴 **Indicadores de Compatibilidad**:
-  - **Óptimo (Verde)**: Ejecución directa en la GPU (VRAM suficiente) a máxima velocidad.
-  - **Parcial (Amarillo)**: Ejecución híbrida (CPU + GPU) o CPU dedicada. Inferencia más lenta pero segura.
-  - **No Recomendado (Rojo)**: Excede los recursos disponibles del sistema. Ejecutarlo podría colgar el ordenador.
-- 🎛️ **Simulador de Hardware**: ¿Deseas saber si vale la pena actualizar tu hardware? Activa el simulador y ajusta los controles deslizantes (sliders) de RAM y VRAM para ver instantáneamente cómo cambia la compatibilidad de los modelos.
-- 💻 **Instrucciones Paso a Paso**: Cada modelo incluye indicaciones sencillas sobre cómo ejecutarlo localmente utilizando herramientas populares como **Ollama**, **ComfyUI** o scripts de Python.
+  <p align="center">
+    Descubre qué modelos de Inteligencia Artificial (LLMs, Difusión, Audio, Visión) puedes ejecutar localmente de forma segura sin sobrecargar tu PC.
+  </p>
+</div>
 
 ---
 
-## Requisitos Previos
+## 🚀 Sobre el Proyecto
 
-- **Python 3.8 o superior** instalado en el sistema.
-- Conexión a internet (para cargar fuentes e iconos desde CDN en el navegador).
+**ModelFit** es una potente herramienta web desarrollada con un backend en Python (Flask) y un frontend moderno con diseño *Glassmorphism*. Escanea tu hardware al instante (CPU, RAM, GPU y VRAM) y lo cruza con una base de datos actualizada de los mejores modelos Open Source (Llama 3, Qwen 2.5, SDXL, Flux, Whisper, etc.) para indicarte si puedes ejecutarlos de manera óptima, si el rendimiento será parcial o si definitivamente colapsarán tu sistema.
+
+Además, ¡se integra directamente con **Ollama** para instalar software, descargar modelos con 1 clic y probarlos en un chat en vivo!
 
 ---
 
-## Cómo Ejecutar ModelFit Localmente
+## ✨ Características Principales
 
-El proyecto incluye scripts automatizados para facilitar la puesta en marcha con un solo click.
+* 🔍 **Hardware Scanner**: Detección automática en tiempo real de núcleos de CPU, porcentaje de uso, memoria RAM y memoria VRAM (Nvidia, AMD, Apple Silicon).
+* 🚥 **Tráforo de Compatibilidad**:
+  * 🟢 **Óptimo**: El modelo cabe completamente en la VRAM de tu GPU para máxima velocidad.
+  * 🟡 **Parcial**: Uso híbrido (CPU + GPU) o descarga (offloading). Será más lento pero seguro.
+  * 🔴 **No Recomendado**: Tu RAM/VRAM no es suficiente. Intentar cargarlo congelará el equipo.
+* 🛠️ **Integración Nativa con Ollama**:
+  * Instalación auto-asistida del software Ollama en Linux/macOS/Windows con 1 clic.
+  * Descarga de modelos en segundo plano con barras de progreso.
+  * **Playground en vivo** para chatear con los modelos instalados vía Server-Sent Events (SSE).
+* 🎛️ **Simulador de Hardware**: Cambia los recursos virtuales con sliders para saber qué PC necesitarías comprar para ejecutar modelos masivos.
 
-### En Linux y macOS:
+---
 
-1. Abre la terminal en la carpeta del proyecto.
-2. Dale permisos de ejecución al script si es necesario:
+## 💻 Tecnologías Utilizadas
+
+- **Backend**: Python 3, Flask, Psutil (Escaneo de sistema), Subprocess & Threading.
+- **Frontend**: Vanilla JavaScript, CSS3 (Variables, Flexbox/Grid, Glassmorphism), HTML5.
+- **APIs**: Conexión a la API de Ollama (`localhost:11434`) y Streaming (SSE).
+- **Diseño**: UI/UX Premium, Modo Oscuro Nativo, Iconografía por Lucide.
+
+---
+
+## ⚙️ Instalación y Uso
+
+### Pre-requisitos
+Asegúrate de tener instalado **Python 3.8+**.
+
+### En Linux / macOS (Instalación Rápida)
+
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/nredondo26/ModelFit.git
+   cd ModelFit
+   ```
+2. Ejecuta el script automatizado (creará el entorno, instalará dependencias y levantará el servidor):
    ```bash
    chmod +x run.sh
-   ```
-3. Ejecuta el script:
-   ```bash
    ./run.sh
    ```
-4. Abre tu navegador web e ingresa a: **`http://127.0.0.1:5000`**
+3. Abre tu navegador en **`http://127.0.0.1:5000`**
 
-### En Windows (Manual):
+### En Windows (Manual)
 
-1. Abre PowerShell o el símbolo del sistema en la carpeta del proyecto.
-2. Crea el entorno virtual de Python:
+1. Clona el repositorio y abre la carpeta en PowerShell:
+   ```powershell
+   git clone https://github.com/nredondo26/ModelFit.git
+   cd ModelFit
+   ```
+2. Crea y activa un entorno virtual:
    ```powershell
    python -m venv .venv
+   .\.venv\Scripts\activate
    ```
-3. Activa el entorno virtual:
-   ```powershell
-   .venv\Scripts\activate
-   ```
-4. Instala las dependencias requeridas:
-   ```powershell
-   pip install --upgrade pip
-   ```
+3. Instala las dependencias:
    ```powershell
    pip install -r requirements.txt
    ```
-5. Ejecuta la aplicación:
+4. Ejecuta el servidor:
    ```powershell
    python app.py
    ```
-6. Abre tu navegador web e ingresa a: **`http://127.0.0.1:5000`**
+5. Abre tu navegador en **`http://127.0.0.1:5000`**
 
 ---
 
-## Cómo Subir este Proyecto a un Repositorio Público en GitHub
+## 🤖 Modelos Soportados
 
-Para compartir este proyecto o publicarlo en tu perfil de GitHub, sigue estos pasos:
+La base de datos se actualiza constantemente e incluye (entre muchos otros):
+- **LLMs**: Llama 3.1 / 3.3, Mixtral, Qwen 2.5, Gemma 2, Command R.
+- **Coding**: Qwen 2.5 Coder, DeepSeek Coder V2, Codestral, StarCoder2.
+- **Visión**: Pixtral 12B, Qwen2-VL, Llama 3.2 Vision.
+- **Imágenes**: Stable Diffusion 3, SDXL, FLUX.1.
+- **Audio**: Whisper Large v3, Bark, Parler-TTS.
 
-1. **Crea un nuevo repositorio en GitHub**:
-   - Ve a [GitHub](https://github.com) e inicia sesión.
-   - Haz clic en el botón **"New"** (Nuevo) para crear un repositorio.
-   - Asígnale un nombre como `modelfit` o `can-i-run-local-ai`.
-   - Selecciona la opción **Public** (Público).
-   - **IMPORTANTE**: No selecciones "Add a README file", "Add .gitignore" ni "Choose a license" (ya que el proyecto local ya contiene los archivos `.gitignore` y `README.md` necesarios).
-   - Haz clic en **Create repository**.
+---
 
-2. **Inicializa Git localmente y vincula el repositorio**:
-   - Abre la terminal en la carpeta del proyecto local y ejecuta los siguientes comandos:
-     ```bash
-     # Inicializar el repositorio Git local
-     git init
-
-     # Agregar todos los archivos (el archivo .gitignore evitará subir carpetas basura como .venv)
-     git add .
-
-     # Hacer el primer commit local
-     git commit -m "Initial commit - ModelFit Hardware Evaluator"
-
-     # Crear la rama principal llamada main
-     git branch -M main
-
-     # Vincular tu repositorio local con el de GitHub (reemplaza con tu enlace de GitHub)
-     git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
-
-     # Subir el código a GitHub
-     git push -u origin main
-     ```
-
-¡Y listo! Tu código estará publicado y disponible para toda la comunidad.
+<div align="center">
+  <i>Desarrollado con ❤️ para la comunidad Open Source de Inteligencia Artificial.</i>
+</div>
